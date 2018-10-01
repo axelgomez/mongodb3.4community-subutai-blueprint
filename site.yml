@@ -1,0 +1,28 @@
+- hosts: all
+  gather_facts: false
+  remote_user: root
+  tasks: 
+    - name: Update
+      raw: apt-get -y --allow-unauthenticated update || true
+
+    - name: Ensure python is available
+      raw: test -e /usr/bin/python || apt install -y --allow-unauthenticated python-minimal
+
+    - name: Ensure python-apt is available
+      raw: test -d /usr/share/python-apt || apt install -y --allow-unauthenticated python-apt
+
+    - name: Upgrade
+      raw: apt-get -y --allow-unauthenticated upgrade
+
+- hosts: webserver
+  remote_user: root
+  tasks:
+    - name: Make webserver
+      get_url:
+        url: https://raw.githubusercontent.com/axelgomez/testwebserver-blueprint/master/files/webserver.py
+        dest: /tmp/webserver.py
+        mode: 0755
+
+    - name: Run webserver
+      shell: |
+        nohup python /tmp/webserver.py 8080 &

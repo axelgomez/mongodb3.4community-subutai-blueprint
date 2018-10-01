@@ -1,0 +1,72 @@
+{
+    "name": "${environmentName}",
+    "description": "MongoDB 3.4 Community Server",
+    "version": "0.0.1",
+    "author": "https://github.com/axelgomez",
+    "containers": [
+        {
+            "hostname": "${webContainerName}",
+            "template": "debian-stretch",
+            "peer-criteria": "HTTP-GROUP",
+            "size": "${containerSize}",
+            "port-mapping": [
+                {
+                    "protocol": "tcp",
+                    "domain": "${domainName}",
+                    "internal-port": "27017",
+                    "external-port": "27017"
+                }
+            ]
+        }
+    ],
+    "peer-criteria": [
+        {
+            "name": "HTTP-GROUP",
+            "max-price": ""
+        }
+    ],
+    "ansible-configuration": {
+        "source-url": "https://github.com/axelgomez/mongodb3.4-community-subutai-blueprint/archive/master.zip",
+        "ansible-playbook": "site.yml",
+        "extra-vars": [
+            {
+                "key": "domain_name",
+                "value": "${domainName}"
+            }
+        ],
+        "groups": [
+            {
+                "name": "mongodb34",
+                "hostnames": [
+                    "${webContainerName}"
+                ]
+            }
+        ]
+    },
+    "user-variables": {
+        "environmentName": {
+            "description": "Enter the environment name",
+            "type": "string",
+            "default": "MongoDB",
+            "validation": "[a-zA-Z0-9]+"
+        },
+        "webContainerName": {
+            "description": "Enter the container's hostname",
+            "type": "string",
+            "default": "mongodb34",
+            "validation": "[a-zA-Z0-9]+"
+        },
+        "domainName": {
+            "description": "Enter the application domain name",
+            "type": "domain",
+            "default": "change.the.domain",
+            "validation": "[a-zA-Z0-9]+"
+        },
+        "containerSize": {
+            "description": "Container Size",
+            "type": "enum",
+            "default": "TINY",
+            "validation": "TINY,SMALL"
+        }
+    }
+}

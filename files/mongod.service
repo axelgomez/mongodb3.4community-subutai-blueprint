@@ -1,0 +1,11 @@
+[Unit]
+Description=MongoDB Community Server v3.4.17
+After=network-online.target
+
+[Service]
+User=mongodb
+Restart=on-failure
+ExecStart=/opt/mongo3.4/bin/mongod -f /etc/mongod.conf
+
+[Install]
+WantedBy=multi-user.target
