@@ -14,16 +14,16 @@
     - name: Installing required dependencies
       shell: |
         apt -y install curl libcurl3 libgssapi-krb5-2 libkrb5-dbg libldap-2.4-2 libpcap0.8 libsasl2-2 snmp openssl
-    - name: Change to /root directory
+    - name: Changing to /root directory
       shell: |
         cd
-    - name: Download MongoDB 3.4 Community Server
+    - name: Downloading MongoDB 3.4 Community Server
       shell: |
         curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.4.17.tgz
     - name: Unpacking downloaded file (MongoDB Server)
       shell: |
         tar -zxvf mongodb-linux-x86_64-3.4.17.tgz
-    - name: Make the required folders
+    - name: Creating the required folders
       shell: |
         mkdir /opt/mongo3.4
     - name: Moving binaries into /opt/mongo3.4
@@ -51,28 +51,28 @@
       shell: |
         mkdir /var/run/mongodb && chown mongodb:mongodb -R /var/run/mongodb
 
-    - name: Download mongod.conf
+    - name: Downloading mongod.conf
       get_url:
         url: https://raw.githubusercontent.com/axelgomez/mongodb3.4community-subutai-blueprint/master/files/mongod.conf
         dest: /etc/mongod.conf
         mode: 0644
 
-    - name: Edit mongod.conf
+    - name: Editing mongod.conf
       shell: |
         IP=$(ip addr | awk '/inet / {sub(/\/.*/, "", $2); print $2}' | grep 172) #para obtener la ip privada del container && sed -i -e 's/#bindIp: 127.0.0.1/bindIp: '${IP}'/g' /etc/mongod.conf
 
-    - name: Download mongod.service
+    - name: Downloading mongod.service
       get_url:
         url: https://raw.githubusercontent.com/axelgomez/mongodb3.4community-subutai-blueprint/master/files/mongod.service
         dest: /etc/systemd/system/mongod.service
         mode: 0644
 
-    - name: Change Ownership /etc/mongod.conf to mongodb user
+    - name: Changing Ownership /etc/mongod.conf to mongodb user
       shell: |
         chown mongodb:mongodb /etc/mongod.conf
     - name: systemctl daemon-reload
       shell: |
         systemctl daemon-reload
-    - name: Start MongoDB service
+    - name: Starting MongoDB service
       shell: |
         service mongod start
