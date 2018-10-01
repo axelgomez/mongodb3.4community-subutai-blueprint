@@ -3,17 +3,17 @@
   remote_user: root
   tasks: 
     - name: Update
-      raw: apt-get -y --allow-unauthenticated update || true
+      raw: apt -y --allow-unauthenticated update || true
 
     - name: Upgrade
-      raw: apt-get -y --allow-unauthenticated upgrade
+      raw: apt -y --allow-unauthenticated upgrade
 
 - hosts: mongodb34
   remote_user: root
   tasks:
     - name: Installing required dependencies
       shell: |
-        apt-get -y install curl libcurl3 libgssapi-krb5-2 libkrb5-dbg libldap-2.4-2 libpcap0.8 libsasl2-2 snmp openssl
+        apt -y install curl libcurl3 libgssapi-krb5-2 libkrb5-dbg libldap-2.4-2 libpcap0.8 libsasl2-2 snmp openssl
     - name: Change to /root directory
       shell: |
         cd
