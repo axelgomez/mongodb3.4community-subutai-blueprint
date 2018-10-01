@@ -5,24 +5,74 @@
     - name: Update
       raw: apt-get -y --allow-unauthenticated update || true
 
-    - name: Ensure python is available
-      raw: test -e /usr/bin/python || apt install -y --allow-unauthenticated python-minimal
-
-    - name: Ensure python-apt is available
-      raw: test -d /usr/share/python-apt || apt install -y --allow-unauthenticated python-apt
-
     - name: Upgrade
       raw: apt-get -y --allow-unauthenticated upgrade
 
-- hosts: webserver
+- hosts: mongodb34
   remote_user: root
   tasks:
-    - name: Make webserver
-      get_url:
-        url: https://raw.githubusercontent.com/axelgomez/testwebserver-blueprint/master/files/webserver.py
-        dest: /tmp/webserver.py
-        mode: 0755
-
-    - name: Run webserver
+    - name: Installing required dependencies
       shell: |
-        nohup python /tmp/webserver.py 8080 &
+        apt-get -y install curl libcurl3 libgssapi-krb5-2 libkrb5-dbg libldap-2.4-2 libpcap0.8 libsasl2-2 snmp openssl
+    - name: Change to /root directory
+      shell: |
+        cd
+    - name: Download MongoDB 3.4 Community Server
+      shell: |
+        curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.4.17.tgz
+    - name: Unpacking downloaded file (MongoDB Server)
+      shell: |
+        tar -zxvf mongodb-linux-x86_64-3.4.17.tgz
+    - name: Make the required folders
+      shell: |
+        mkdir /opt/mongo3.4
+    - name: Moving binaries into /opt/mongo3.4
+      shell: |
+        mv mongodb-linux-x86_64-3.4.17/* /opt/mongo3.4/
+    - name: Removing source folder
+      shell: |
+        rm -R mongodb-linux-x86_64-3.4.17
+    - name: Creating the data folder
+      shell: |
+        mkdir -p /data/mongo3.4
+    - name: Creating the logs folder
+      shell: |
+        mkdir /opt/mongo3.4/logs
+    - name: Creating the mongodb user
+      shell: |
+        useradd mongodb
+    - name: Changing ownership of /opt/mongo3.4 to mongodb user
+      shell: |
+        chown -R mongodb:mongodb /opt/mongo3.4
+    - name: Changing ownership of /data/mongo3.4 to mongodb user
+      shell: |
+        chown -R mongodb:mongodb /data/mongo3.4
+    - name: Creating folder of pid and changing ownership to mongodb user
+      shell: |
+        mkdir /var/run/mongodb && chown mongodb:mongodb -R /var/run/mongodb
+
+    - name: Download mongod.conf
+      get_url:
+        url: https://raw.githubusercontent.com/axelgomez/mongodb3.4community-subutai-blueprint/master/files/mongod.conf
+        dest: /etc/mongod.conf
+        mode: 0644
+
+    - name: Edit mongod.conf
+      shell: |
+        IP=$(ip addr | awk '/inet / {sub(/\/.*/, "", $2); print $2}' | grep 172) #para obtener la ip privada del container && sed -i -e 's/#bindIp: 127.0.0.1/bindIp: '${IP}'/g' /etc/mongod.conf
+
+    - name: Download mongod.service
+      get_url:
+        url: https://raw.githubusercontent.com/axelgomez/mongodb3.4community-subutai-blueprint/master/files/mongod.service
+        dest: /etc/systemd/system/mongod.service
+        mode: 0644
+
+    - name: Change Ownership /etc/mongod.conf to mongodb user
+      shell: |
+        chown mongodb:mongodb /etc/mongod.conf
+    - name: systemctl daemon-reload
+      shell: |
+        systemctl daemon-reload
+    - name: Start MongoDB service
+      shell: |
+        service mongod start

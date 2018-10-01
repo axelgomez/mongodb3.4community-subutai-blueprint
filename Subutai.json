@@ -13,7 +13,7 @@
                 {
                     "protocol": "tcp",
                     "domain": "${domainName}",
-                    "internal-port": "27017",
+                    "internal-port": "27018",
                     "external-port": "27017"
                 }
             ]
