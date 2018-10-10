@@ -47,9 +47,6 @@
     - name: Changing ownership of /data/mongo3.4 to mongodb user
       shell: |
         chown -R mongodb:mongodb /data/mongo3.4
-    - name: Creating folder of pid and changing ownership to mongodb user
-      shell: |
-        mkdir /var/run/mongodb && chown mongodb:mongodb -R /var/run/mongodb
 
     - name: Downloading mongod.conf
       get_url:
@@ -59,7 +56,7 @@
 
     - name: Editing mongod.conf
       shell: |
-        IP=$(ip addr | awk '/inet / {sub(/\/.*/, "", $2); print $2}' | grep 172) #para obtener la ip privada del container && sed -i -e 's/#bindIp: 127.0.0.1/bindIp: '${IP}'/g' /etc/mongod.conf
+        IP=$(ip addr | awk '/inet / {sub(/\/.*/, "", $2); print $2}' | grep 172) && sed -i -e 's/#bindIp: 127.0.0.1/bindIp: '${IP}'/g' /etc/mongod.conf
 
     - name: Downloading mongod.service
       get_url:
